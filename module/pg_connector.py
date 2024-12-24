@@ -1,17 +1,20 @@
+import os
 import pandas as  pd
 import psycopg2 as pg
 from psycopg2  import sql
 from psycopg2.extras import RealDictCursor
 
 class PostgreSQLConnector:
+    
     def ___init__(self, host, database, user, password, port=5432):
         self.host = host
         self.database = database
         self.user = user
         self.pw = password
         self.port = port
-        self.connection = None
+        self.__connection = None
         self.cursor = None
+        self.__path_db_sctructure = "D:\\Hungtv7\\Personal_Fin\\"
 
     def connect(self):
         try :
@@ -22,21 +25,21 @@ class PostgreSQLConnector:
                 password=self.pw,
                 port=self.port
             )
-            self.cursor = self.connection.cursor(cursor_factory=RealDictCursor)
+            self.cursor = self.__connection.cursor(cursor_factory=RealDictCursor)
             print("Connection established")
         except Exception as e:
             print(f"Failed to connect to database: {e}")
 
     def execute_query(self, query, params=None):
 
-        if self.connection is None:
+        if self.__connection is None:
             print("No connection to database")
             return
         try:
             self.cursor.execute(query, params)
-            self.connection.commit()
+            self.__connection.commit()
         except Exception as e:
-            self.connection.rollback()
+            self.__connection.rollback()
             print(f"Failed to execute query: {e} ")
     
     def fectch_one(self):
@@ -60,23 +63,23 @@ class PostgreSQLConnector:
             table_name: Name of the table to create
             columns: Dictionary where keys are column's name and value are SQL data
         """
-        if self.connection is None:
+        if self.__connection is None:
             print("No connections to any database")
             return
         try :
             columns_definitions = ','.join(f"{col} {dtype}" for col, dtype in columns.items())
             create_table_query = sql.SQL(f"CREATE TABLE IF NOT EXISTS {sql.Identifier(table_name)} ({sql.SQL(columns_definitions)});")
             self.cursor.execute(create_table_query)
-            self.connection.commit()
+            self.__connection.commit()
             #Check table existsence
         except Exception as e:
-            self.connection.rollback()
+            self.__connection.rollback()
             print(f"Failed to create table {table_name}: {e}")
     
     def close(self):
         """Close database connection"""
         if self.cursor:
             self.cursor.close()
-        if self.connection:
-            self.connection.close()
+        if self.__connection:
+            self.__connection.close()
             print("Connection closed.")

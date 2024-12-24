@@ -1,2 +1,5 @@
 VNG_payslip/
-config/
+config/db.json
+.ipynb_checkpoints/
+.virtual_documents/
+.Untitled.ipynb.layout
