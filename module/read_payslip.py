@@ -89,7 +89,6 @@ class payslipReader(pdfReader):
             
             for char in ("/", "\n"):
                 try:
-                    print(header.split(f"{char}")[1])
                     english_only = payslipReader.special_case_for_header(header.split(f"{char}")[1])
                 except IndexError as e:
                     continue
@@ -112,16 +111,40 @@ class payslipReader(pdfReader):
                         df = df.drop(df.index[0])  # Drop the row used for column names
                         tables.append(df)
         return tables
+    
+    def clean_tables(self, table):
+        """Clean the table by removing rows with all NaN and No meaning values."""
+        transposed_tables = self.extract_tables()
+        cleaned_tables = []
+        general_info = transposed_tables[0]
+        salary_info = transposed_tables[1]
+        working_info = transposed_tables[2]
+        derived_detail = transposed_tables[4]
+        bonus_detail = transposed_tables[5]
+        deduction_info = transposed_tables[7]
+        deduction_detail = transposed_tables[8]
+        net_income = transposed_tables[9]
 
+        # Remove 3 rows from table
+        salary_info = salary_info.drop(salary_info.index[0:3])
+        working_info = working_info.drop(working_info.index[0:3])
+        derived_detail = derived_detail.drop(derived_detail.index[0:3])
+        cleaned_tables.append(general_info)
+        cleaned_tables.append(salary_info)
+        cleaned_tables.append(working_info)
+        cleaned_tables.append(derived_detail)
+
+        # Remove 2 rows from table
+        bonus_detail = bonus_detail.drop(bonus_detail.index[0:2])
+        deduction_detail = deduction_detail.drop(deduction_detail.index[0:2])
+        net_income = net_income.drop(net_income.index[0:2])
+        cleaned_tables.append(bonus_detail)
+        cleaned_tables.append(deduction_info)
+        cleaned_tables.append(deduction_detail)
+        cleaned_tables.append(net_income)
+
+        return cleaned_tables
 
 vng_payslip_reader = payslipReader(r"D:\Hungtv7\Personal_Fin\VNG_payslip\payslip_VG-15316_2021_04.pdf")
 
-transposed_tables = vng_payslip_reader.extract_tables()
-
-# Display the first few rows of each extracted table for illustration
-for i, table in enumerate(transposed_tables):
-    if table.shape[0] < 3:
-        table.drop([1])   
-    elif table.shape[0] >= 3:
-        table.drop([1])
-    print(f"Transposed Table {i+1}:\n", table)
+transposed_tables = vng_payslip_reader.clean_tables()
