@@ -112,7 +112,7 @@ class payslipReader(pdfReader):
                         tables.append(df)
         return tables
     
-    def clean_tables(self, table):
+    def clean_tables(self):
         """Clean the table by removing rows with all NaN and No meaning values."""
         transposed_tables = self.extract_tables()
         cleaned_tables = []
@@ -148,3 +148,4 @@ class payslipReader(pdfReader):
 vng_payslip_reader = payslipReader(r"D:\Hungtv7\Personal_Fin\VNG_payslip\payslip_VG-15316_2021_04.pdf")
 
 transposed_tables = vng_payslip_reader.clean_tables()
+print(vng_payslip_reader.__dir__() )
