@@ -48,19 +48,22 @@ class pdfReader():
             cleaned.append(english_only.strip().replace(' ', '_'))  # Replace spaces with underscores
         return cleaned
     
-    def exportColName(self):
+    def exportColName(self, tables):
         """"Export list col names from dataframe to json file to prepare for mapping"""
-        tables = self.extract_tables()
-        for table in tables:
+        # tables = self.extract_tables()
+        final_dict = {}
+        for i, table in enumerate(tables):
+            if i == 0:
+                continue
             # Assuming target headers are column's names
             headers = table.columns.tolist()
 
             # Create a dict with column's names as keys and empty string as values
             col_dict = {header: "" for header in headers}
-
+            final_dict.update(col_dict)
             # Export the dict to  a JSON file
-            with open(self.__path_col_schema, "w") as f:
-                json.dump(col_dict, f, indent=4)
+        with open(self.__path_col_schema, "w") as f:
+            json.dump(final_dict, f, indent=4)
         
 
 
@@ -70,6 +73,7 @@ class payslipReader(pdfReader):
         super().__init__(pdf_path, path_column_schema)
 
     def special_case_for_header(header):
+        # List of special cases for column names
         if header == 'Công ty':
             return "Company"
         # elif header == "Tổng số ngày nghỉ hưởng lương BHXH (tỷ lệ 75%)":
@@ -105,6 +109,7 @@ class payslipReader(pdfReader):
                 page_tables = page.extract_tables()
                 for table in page_tables:
                     if table:
+                        # Transpose the table to have columns as headers
                         df = pd.DataFrame(table[1:], columns=table[0]).transpose()
                         df.reset_index(inplace=True)
                         df.columns = self.clean_headers(df.iloc[0])  # Clean headers
@@ -129,6 +134,7 @@ class payslipReader(pdfReader):
         salary_info = salary_info.drop(salary_info.index[0:3])
         working_info = working_info.drop(working_info.index[0:3])
         derived_detail = derived_detail.drop(derived_detail.index[0:3])
+        # Add distinct tables to the list
         cleaned_tables.append(general_info)
         cleaned_tables.append(salary_info)
         cleaned_tables.append(working_info)
@@ -138,14 +144,17 @@ class payslipReader(pdfReader):
         bonus_detail = bonus_detail.drop(bonus_detail.index[0:2])
         deduction_detail = deduction_detail.drop(deduction_detail.index[0:2])
         net_income = net_income.drop(net_income.index[0:2])
+        # Add distinct tables to the list
         cleaned_tables.append(bonus_detail)
         cleaned_tables.append(deduction_info)
         cleaned_tables.append(deduction_detail)
         cleaned_tables.append(net_income)
 
+        # Return list of tables removed all unnecessary rows
         return cleaned_tables
 
 vng_payslip_reader = payslipReader(r"D:\Hungtv7\Personal_Fin\VNG_payslip\payslip_VG-15316_2021_04.pdf")
 
-transposed_tables = vng_payslip_reader.clean_tables()
-print(vng_payslip_reader.__dir__() )
+# tables = vng_payslip_reader.extract_tables() # Extract tables from the PDF file
+transposed_tables = vng_payslip_reader.clean_tables() # Clean the tables
+vng_payslip_reader.exportColName(transposed_tables) # Export column names to a JSON file
