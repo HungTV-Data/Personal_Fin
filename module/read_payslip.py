@@ -101,6 +101,7 @@ class payslipReader(pdfReader):
         
     def extract_tables(self):
         """Extract tables from the PDF file."""
+
         with pdfplumber.open(self._pdfReader__pdf_path) as pdf:
             tables = []
             for page in pdf.pages:
@@ -162,12 +163,12 @@ class payslipReader(pdfReader):
         return cleaned_tables
 
 
-if __name__ == "__main__":
-    vng_payslip_reader = payslipReader(r"D:\Hungtv7\Personal_Fin\VNG_payslip\payslip_VG-15316_2023_05.pdf")
+# if __name__ == "__main__":
+#     vng_payslip_reader = payslipReader(r"D:\Hungtv7\Personal_Fin\VNG_payslip\payslip_VG-15316_2023_05.pdf")
 
-# tables = vng_payslip_reader.extract_tables() # Extract tables from the PDF file
-transposed_tables = vng_payslip_reader.clean_tables() # Clean the tables
-for i, table in enumerate(transposed_tables):
-    print(f"Table {i + 1}")
-    print(table)
-    print("\n")
+# # tables = vng_payslip_reader.extract_tables() # Extract tables from the PDF file
+# transposed_tables = vng_payslip_reader.clean_tables() # Clean the tables
+# for i, table in enumerate(transposed_tables):
+#     print(f"Table {i + 1}")
+#     print(table)
+#     print("\n")
