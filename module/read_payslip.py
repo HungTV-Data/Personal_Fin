@@ -114,6 +114,16 @@ class payslipReader(pdfReader):
                         df = df.drop(df.index[0])  # Drop the row used for column names
                         tables.append(df)
         return tables
+
+    def remap_column_name(self, tables):
+        """Remap column names to match the database schema with schema list json."""
+        if self._pdfReader__path_col_schema is None:
+            raise ValueError("Column schema path is not set")
+        with open(self._pdfReader__path_col_schema, "r") as f:
+            col_schema = json.load(f)
+        for table in tables:
+            table.rename(columns=col_schema, inplace=True)
+        return tables
     
     def clean_tables(self):
         """Clean the table by removing rows with all NaN and No meaning values."""
@@ -151,7 +161,9 @@ class payslipReader(pdfReader):
         # Return list of tables removed all unnecessary rows
         return cleaned_tables
 
-vng_payslip_reader = payslipReader(r"D:\Hungtv7\Personal_Fin\VNG_payslip\payslip_VG-15316_2023_05.pdf")
+
+if __name__ == "__main__":
+    vng_payslip_reader = payslipReader(r"D:\Hungtv7\Personal_Fin\VNG_payslip\payslip_VG-15316_2023_05.pdf")
 
 # tables = vng_payslip_reader.extract_tables() # Extract tables from the PDF file
 transposed_tables = vng_payslip_reader.clean_tables() # Clean the tables

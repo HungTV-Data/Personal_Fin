@@ -67,9 +67,9 @@ class PostgreSQLConnector:
             print("No connections to any database")
             return
         try :
-            columns_definitions = ','.join(f"{col} {dtype}" for col, dtype in columns.items())
-            create_table_query = sql.SQL(f"CREATE TABLE IF NOT EXISTS {sql.Identifier(table_name)} ({sql.SQL(columns_definitions)});")
-            self.cursor.execute(create_table_query)
+            with open(os.path.join(self.__path_db_sctructure, f"{table_name}.sql"), 'r') as f:
+                sql_script = f.read()
+            self.cursor.execute(sql_script)
             self.__connection.commit()
             #Check table existsence
         except Exception as e:
